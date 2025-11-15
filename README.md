@@ -68,7 +68,7 @@ View Image Metadata of ComfyUI **as well as of ForgeUI or Automatic 1111 generat
 ● View Upscale Model used info:
 <br>
 
-<img width="1425" height="996" alt="Screenshot 2025-11-15 095845" src="https://github.com/user-attachments/assets/f8ce9a0e-195a-4a7a-ac9a-c0bf35d0b7c2" />
+<img width="1829" height="916" alt="Screenshot 2025-11-15 103602" src="https://github.com/user-attachments/assets/5f0424ae-980a-48dd-a1d0-7a76cba976e3" />
 <br>
 <br>
 
