@@ -378,7 +378,7 @@ class SimpleReadableMetadataSG:
         if "parameters" in png_info:
             return png_info["parameters"]
         
-        # Check for EXIF data in WebP (THIS IS THE KEY CHANGE)
+        # Check for EXIF data in WebP
         if "exif" in png_info:
             try:
                 exif_bytes = png_info["exif"]
@@ -736,9 +736,7 @@ class SimpleReadableMetadataSG:
             file_size_str = f" | {file_size_mb:.2f}MB" if file_size_mb is not None else ""
             output.append(f"{width}x{height} | {resolution_mp:.2f}MP | Ratio: {ratio_display}{file_size_str}")
             output.append("")
-
-
-            
+        
             # Extract model name for display at the top
             model_name_display = "N/A"
             for node_id, node_data in data.items():
@@ -937,7 +935,6 @@ class SimpleReadableMetadataSG:
                                     processed_keys.add(node_key)
                                     continue
                             
-                            # FIX #2: Skip node references (lists)
                             if isinstance(lora_value, list):
                                 processed_keys.add(node_key)
                                 continue
@@ -1002,7 +999,6 @@ class SimpleReadableMetadataSG:
                                         processed_keys.add(possible_key)
                                         break
                             
-                            # FIX #3: Add string check before os.path.basename
                             if isinstance(lora_value, list):
                                 lora_value = self.resolve_node_reference(data, lora_value)
                             
