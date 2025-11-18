@@ -730,9 +730,6 @@ class SimpleReadableMetadataMAXSG:
             print(f"Error parsing WebUI format: {e}")
             return f"Error parsing WebUI metadata: {str(e)}"
     
-    # The parse_comfyui_format and other methods remain the same as your original code
-    # I'm including the rest of the file from your original upload
-    
     def parse_comfyui_format(self, metadata_raw, include_emojis=True, image_path=None, file_size_mb=None):
         output = []
         width = getattr(self, "_last_width", None)
@@ -1330,7 +1327,7 @@ class SimpleReadableMetadataMAXSG:
                             elif class_type == "CLIPTextEncode" or "TextEncode" in class_type or "Prompt" in class_type:
                                 title = node_data.get("_meta", {}).get("title", "").lower()
                                 
-                                # Try multiple text field names (FIX: This is what the Standard node does)
+                                # Try multiple text field names
                                 text_content = None
                                 for text_key in ["text", "prompt", "conditioning", "string"]:
                                     if text_key in node_data["inputs"]:
