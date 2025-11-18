@@ -45,16 +45,58 @@ class SimpleReadableMetadataSG:
             return "Invalid image file: {}".format(image)
         return True
     
+    def _get_prompt_data_from_image(self, img):
+        """Helper method to extract prompt data from both PNG and WebP formats"""
+        try:
+            # First check direct img.info (works for PNG)
+            if hasattr(img, 'info') and img.info:
+                if "prompt" in img.info:
+                    try:
+                        prompt_str = img.info["prompt"]
+                        if isinstance(prompt_str, str):
+                            return json.loads(prompt_str)
+                        return prompt_str
+                    except:
+                        pass
+            
+            # Check EXIF data for WebP
+            if "exif" in img.info:
+                try:
+                    exif_bytes = img.info["exif"]
+                    if isinstance(exif_bytes, bytes):
+                        exif_string = exif_bytes.decode('utf-8', errors='ignore')
+                        
+                        # Look for prompt: marker
+                        if "prompt:" in exif_string:
+                            prompt_start = exif_string.find("prompt:")
+                            if prompt_start != -1:
+                                prompt_data = exif_string[prompt_start + 7:]
+                                prompt_data = prompt_data.split('\x00')[0]
+                                try:
+                                    return json.loads(prompt_data)
+                                except:
+                                    pass
+                except Exception as e:
+                    print(f"Error parsing WebP EXIF for prompt: {e}")
+        except Exception as e:
+            print(f"Error extracting prompt data: {e}")
+        
+        return None
+
+    
     def extract_model_name(self, img):
         """Extract model name from image metadata"""
         model_name = "N/A"
+        
         try:
             if not hasattr(img, 'info') or not img.info:
                 return model_name
             
-            if 'prompt' in img.info:
+            # Try to get prompt data (works for both PNG and WebP)
+            prompt_data = self._get_prompt_data_from_image(img)
+            
+            if prompt_data:
                 try:
-                    prompt_data = json.loads(img.info['prompt'])
                     for node_id, node_data in prompt_data.items():
                         class_type = node_data.get('class_type', '')
                         inputs = node_data.get('inputs', {})
@@ -78,6 +120,7 @@ class SimpleReadableMetadataSG:
                 except Exception as e:
                     print(f"Error parsing prompt metadata: {e}")
             
+            # Try workflow format (PNG direct access)
             if model_name == "N/A" and 'workflow' in img.info:
                 try:
                     workflow_data = json.loads(img.info['workflow'])
@@ -91,6 +134,7 @@ class SimpleReadableMetadataSG:
                 except Exception as e:
                     print(f"Error parsing workflow metadata: {e}")
             
+            # Try A1111 format (PNG direct access)
             if model_name == "N/A" and 'parameters' in img.info:
                 try:
                     params = img.info['parameters']
@@ -105,6 +149,7 @@ class SimpleReadableMetadataSG:
             print(f"Error extracting model metadata: {e}")
         
         return model_name
+
     
     def extract_generation_params(self, img):
         """Extract generation parameters (seed, steps, cfg, sampler, scheduler) from image metadata"""
@@ -120,10 +165,11 @@ class SimpleReadableMetadataSG:
             if not hasattr(img, 'info') or not img.info:
                 return params
             
-            # Try ComfyUI format first
-            if 'prompt' in img.info:
+            # Try to get prompt data (works for both PNG and WebP)
+            prompt_data = self._get_prompt_data_from_image(img)
+            
+            if prompt_data:
                 try:
-                    prompt_data = json.loads(img.info['prompt'])
                     for node_id, node_data in prompt_data.items():
                         class_type = node_data.get('class_type', '')
                         inputs = node_data.get('inputs', {})
@@ -152,7 +198,7 @@ class SimpleReadableMetadataSG:
                 except Exception as e:
                     print(f"Error parsing ComfyUI generation params: {e}")
             
-            # Try A1111/Forge format
+            # Try A1111/Forge format (PNG direct access)
             if 'parameters' in img.info and any(v == 'N/A' for v in params.values()):
                 try:
                     metadata_text = img.info['parameters']
@@ -184,6 +230,7 @@ class SimpleReadableMetadataSG:
             print(f"Error extracting generation parameters: {e}")
         
         return params
+
     
     def load_analyze_extract(self, image, emoji_in_readable_text=True):
         """Combined function that loads image, analyzes properties, and extracts metadata"""
@@ -215,13 +262,16 @@ class SimpleReadableMetadataSG:
         batch_size, height, width, channels = image_tensor.shape
         total_pixels = width * height
         resolution_mp = float(total_pixels / 1_000_000)
-
+        
         # Get actual file size
         try:
             file_size_bytes = os.path.getsize(image_path)
             file_size_mb = float(file_size_bytes) / (1024 * 1024)
+            self._current_image_path = os.path.basename(image_path)
+            self._current_file_size = file_size_mb
         except:
             file_size_mb = 0.0
+
 
         
         def gcd(a, b):
@@ -257,18 +307,26 @@ class SimpleReadableMetadataSG:
         height_ratio = float(height // divisor)
         aspect_ratio_decimal = width / height
         closest_standard = find_closest_standard_ratio(aspect_ratio_decimal)
+
+        # Store image/tensor info for readable format reuse
+        self._last_width = width
+        self._last_height = height
+        self._last_resolution_mp = resolution_mp
+        self._last_width_ratio = width_ratio
+        self._last_height_ratio = height_ratio
+        self._last_aspect_ratio_decimal = aspect_ratio_decimal
+        self._last_closest_standard = closest_standard
+        self._last_file_size_mb = file_size_mb
+
         
         line1 = f"{width}x{height} | {resolution_mp:.2f}MP "
-        
         if closest_standard and closest_standard != f"{int(width_ratio)}:{int(height_ratio)}":
             line2 = f"Ratio: {int(width_ratio)}:{int(height_ratio)} or {aspect_ratio_decimal:.2f}:1 or ~{closest_standard}"
         else:
             line2 = f"Ratio: {int(width_ratio)}:{int(height_ratio)} or {aspect_ratio_decimal:.2f}:1"
-        
         line3 = f"File Size: {file_size_mb:.2f}MB"
-      
+        
         lines = [line1, line2, line3]
-
         lines.append("")  # Add empty line for spacing
         
         line4 = f"Model: {model_name}"
@@ -298,34 +356,99 @@ class SimpleReadableMetadataSG:
         }
     
     def extract_raw_metadata(self, img):
-        """Extract raw metadata in format compatible with conversion"""
+        """Extract raw metadata in format compatible with conversion - supports PNG and WebP"""
         png_info = img.info if hasattr(img, 'info') else {}
         
         if not png_info:
             return "No metadata found in image"
         
+        # Check for ComfyUI prompt metadata (works for PNG)
         if "prompt" in png_info:
             try:
                 prompt_data = png_info["prompt"]
                 if isinstance(prompt_data, str):
-                    json.loads(prompt_data)
+                    json.loads(prompt_data)  # Validate JSON
                     return prompt_data
                 else:
                     return json.dumps(prompt_data)
             except:
                 pass
         
+        # Check for A1111/Forge parameters (works for PNG)
         if "parameters" in png_info:
             return png_info["parameters"]
         
+        # Check for EXIF data in WebP (THIS IS THE KEY CHANGE)
+        if "exif" in png_info:
+            try:
+                exif_bytes = png_info["exif"]
+                if isinstance(exif_bytes, bytes):
+                    # Decode the EXIF bytes to string
+                    exif_string = exif_bytes.decode('utf-8', errors='ignore')
+                    
+                    # Look for prompt: or workflow: markers in the EXIF data
+                    if "prompt:" in exif_string:
+                        # Extract the JSON after "prompt:"
+                        prompt_start = exif_string.find("prompt:")
+                        if prompt_start != -1:
+                            # Extract everything after "prompt:"
+                            prompt_data = exif_string[prompt_start + 7:]  # Skip "prompt:"
+                            
+                            # Find the end of the JSON (look for the null terminator or end)
+                            # Try to extract valid JSON
+                            try:
+                                # Remove any trailing null bytes or extra data
+                                prompt_data = prompt_data.split('\x00')[0]
+                                # Validate it's proper JSON
+                                json.loads(prompt_data)
+                                return prompt_data
+                            except:
+                                pass
+                    
+                    # If no valid prompt found, try to extract workflow
+                    if "workflow:" in exif_string:
+                        workflow_start = exif_string.find("workflow:")
+                        if workflow_start != -1:
+                            workflow_data = exif_string[workflow_start + 9:]  # Skip "workflow:"
+                            try:
+                                workflow_data = workflow_data.split('\x00')[0]
+                                workflow_json = json.loads(workflow_data)
+                                # Return workflow as a fallback
+                                return json.dumps({"workflow": workflow_json})
+                            except:
+                                pass
+            
+            except Exception as e:
+                print(f"Error parsing WebP EXIF metadata: {e}")
+        
+        # Fallback: Try using PIL's getexif() method for standard EXIF tags
+        if hasattr(img, 'getexif'):
+            try:
+                exif_data = img.getexif()
+                if exif_data:
+                    # Try to find UserComment tag (0x9286)
+                    user_comment = exif_data.get(0x9286)
+                    if user_comment:
+                        if isinstance(user_comment, bytes):
+                            user_comment = user_comment.decode('utf-8', errors='ignore')
+                        try:
+                            json.loads(user_comment)
+                            return user_comment
+                        except:
+                            return user_comment
+            except Exception as e:
+                print(f"Error reading EXIF via getexif(): {e}")
+        
         return "No ComfyUI or WebUI format metadata found. Image may be from a different source."
+
     
     def parse_metadata(self, metadata_raw, include_emojis=True):
         """Main parsing function that detects format and routes to appropriate converter"""
         format_type = self.detect_format(metadata_raw)
         
         if format_type == "comfyui":
-            Simple_Readable_Metadata = self.parse_comfyui_format(metadata_raw, include_emojis)
+            Simple_Readable_Metadata = self.parse_comfyui_format(metadata_raw, include_emojis, image_path=getattr(self, '_current_image_path', None), file_size_mb=getattr(self, '_current_file_size', None))
+
         elif format_type == "webui":
             Simple_Readable_Metadata = self.parse_webui_format(metadata_raw, include_emojis)
         else:
@@ -480,7 +603,27 @@ class SimpleReadableMetadataSG:
             
             return "\n".join(output)
 
-    def parse_comfyui_format(self, metadata_raw, include_emojis=True):
+    def parse_comfyui_format(self, metadata_raw, include_emojis=True, image_path=None, file_size_mb=None):
+
+        output = []
+
+        width = getattr(self, "_last_width", None)
+        height = getattr(self, "_last_height", None)
+        resolution_mp = getattr(self, "_last_resolution_mp", None)
+        width_ratio = getattr(self, "_last_width_ratio", None)
+        height_ratio = getattr(self, "_last_height_ratio", None)
+        aspect_ratio_decimal = getattr(self, "_last_aspect_ratio_decimal", None)
+        closest_standard = getattr(self, "_last_closest_standard", None)
+        file_size_mb = getattr(self, "_last_file_size_mb", None)
+
+        if width and height and resolution_mp is not None:
+            ratio = f"{int(width_ratio)}:{int(height_ratio)}"
+            std = f" or ~{closest_standard}" if closest_standard else ""
+            ratio_display = f"{ratio} or {aspect_ratio_decimal:.2f}:1{std}"
+            output.append(f"{width}x{height} | {resolution_mp:.2f}MP | Ratio: {ratio_display} | {file_size_mb:.2f}MB")
+        else:
+            output.append("Image dimensions/resolution unavailable.")
+
         """Parse ComfyUI JSON format metadata"""
         try:
             clean_text = metadata_raw.strip()
@@ -584,9 +727,16 @@ class SimpleReadableMetadataSG:
                 except:
                     ratio_display = "N/A"
                 
-                # Single line output: Dimensions | Resolution in MP | Aspect Ratio:
-                output.append(f"{width}x{height} | {resolution_mp:.2f}MP | Ratio: {ratio_display}")
-                output.append("")
+            # Filename
+            if image_path:
+                output.insert(2, f"Filename: {image_path}") 
+                output.insert(3, "") 
+
+            # Dimensions, resolution, ratio, and file size
+            file_size_str = f" | {file_size_mb:.2f}MB" if file_size_mb is not None else ""
+            output.append(f"{width}x{height} | {resolution_mp:.2f}MP | Ratio: {ratio_display}{file_size_str}")
+            output.append("")
+
 
             
             # Extract model name for display at the top
