@@ -1,5 +1,5 @@
 # ComfyUI Simple Readable Metadata-SG     
-View Image Metadata of ComfyUI **as well as of ForgeUI or Automatic 1111 generated images** in Easily Readable Format         
+Extract and View Image Metadata of ComfyUI **as well as of ForgeUI or Automatic 1111 generated images** in Easily Readable Format         
 **Supports PNG as well as WEBP formats**
 
 **Has three nodes:**        
@@ -11,7 +11,7 @@ View Image Metadata of ComfyUI **as well as of ForgeUI or Automatic 1111 generat
 # Nodes info:
 **View Image Metadata in Easy Readable Format: like Prompt , LoRa, Model used, Seed, Steps, CFG, Sampler, Scheduler etc. Also supports outputs for these as well as showing Raw Metadata.** 
 <br>
-<img width="1471" height="944" alt="Screenshot 2025-11-18 223046" src="https://github.com/user-attachments/assets/42f86f57-071d-485f-8fbd-76814fc4170f" />
+<img width="1464" height="953" alt="Screenshot 2025-11-18 224946" src="https://github.com/user-attachments/assets/45f05602-ea2f-4fc5-a867-3c0551841c37" />
 
 <br>
 <br>
