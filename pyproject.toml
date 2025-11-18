@@ -1,7 +1,7 @@
 [project]
 name = "ComfyUI-Simple_Readable_Metadata-SG"
 description = "View Image Metadata of ComfyUI as well as of ForgeUI or Automatic 1111 generated images in Easily Readable Format"
-version = "1.0.1"
+version = "1.5.0"
 license = {file = "LICENSE"} 
 # classifiers = [
 #     # For OS-independent nodes (works on all operating systems)
@@ -27,5 +27,6 @@ PublisherId = "shammi-g"
 DisplayName = "ComfyUI-Simple_Readable_Metadata-SG"
 Icon = "" 
 # "requires-comfyui" = ">=1.0.0"  # ComfyUI version compatibility
+
 
 
