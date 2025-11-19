@@ -2,11 +2,13 @@
 Extract and View Image Metadata of ComfyUI **as well as of ForgeUI or Automatic 1111 generated images** in Easily Readable Format         
 **Supports PNG as well as WEBP formats**
 
-**Has three nodes:**        
+**Has Four nodes:**        
 **1. Simple_Readable_Metadata-SG**            
 **2. Simple_Readable_Metadata_MAX-SG**              
-**3. Simple_Readable_Metadata_Text_Viewer_SG**          
+**3. Simple_Readable_Metadata_Text_Viewer_SG**   
+**4. Simple_Readable_Metadata_Save_Text_SG**
 <br>
+
 ***● Text Viewer has addtional features, check more details below***        
 # Nodes info:
 **View Image Metadata in Easy Readable Format: like Prompt , LoRa, Model used, Seed, Steps, CFG, Sampler, Scheduler etc. Also supports outputs for these as well as showing Raw Metadata.** 
@@ -16,7 +18,12 @@ Extract and View Image Metadata of ComfyUI **as well as of ForgeUI or Automatic 
 <br>
 <br>
 
+# Update:
+
+**Added new node: Simple_Readable_Metadata_Save text** -- Save text in .txt or .json format (optional pretty json)
+<br>
 # Update : 
+
 **1. Added support for WEBP format:** Now also extracts and displays metadata from WEBP images.           
 **2. Filename and Filesize:** Also shows filename and filesize at the top, in the output of Simple_Readable_Metadata      
 **3. New output for filename:** New output for filename (can be connnected to SaveImage node or text viewer node.)
@@ -59,6 +66,10 @@ Extract and View Image Metadata of ComfyUI **as well as of ForgeUI or Automatic 
 ↔️&ensp; &ensp;**Toggle Text Wrapping**          
           
 ***❗NOTE Pasted/ Viewed Text WILL BE Over-written if input node is connected***
+<br>
+<br>
+
+**4. Simple_Readable_Metadata_Save_Text_SG:** Simple Save Text node, save file in .txt or .json format (inlucding optional pretty json)
 <br>
 <br>
 
