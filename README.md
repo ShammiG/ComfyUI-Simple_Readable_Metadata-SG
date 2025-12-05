@@ -2,6 +2,20 @@
 Extract and View Image Metadata of ComfyUI **as well as of ForgeUI or Automatic 1111 generated images** in Easily Readable Format         
 **Supports PNG as well as WEBP formats**
 
+#    ❗Attention❗
+**Switch Node 2.0 OFF, If comfyUI version 0.3.76 or newer**
+<br>
+
+![dsf](https://github.com/user-attachments/assets/127e3340-237c-4364-8f65-910fab6c1b9a)
+
+**Reason:** With new ComfyUI update, it changed the frontend from Lite graph rendering to Vue with **nodes 2.0**.         
+&emsp;&emsp;&emsp; &nbsp; So, now it requires rewriting and troubleshooting with about 2000 lines of code!      
+&emsp;&emsp;&emsp; &nbsp; which i am not currently leaned towards into.
+
+---
+Simple Readable Metadata-SG Nodes Info
+---
+
 **Has Four nodes:**        
 **1. Simple_Readable_Metadata-SG**            
 **2. Simple_Readable_Metadata_MAX-SG**              
