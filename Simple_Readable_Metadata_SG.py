@@ -355,7 +355,7 @@ class SimpleReadableMetadataSG:
             line3 = f"File Size: {file_size_mb:.2f}MB"
 
             lines = [line1, line2, line3]
-            lines.append("")  # Add empty line for spacing
+            lines.append("")
 
             line4 = f"Model: {model_name}"
             lines.append(line4)
@@ -476,17 +476,17 @@ class SimpleReadableMetadataSG:
     def parse_metadata(self, metadata_raw, include_emojis=True):
         """Main parsing function that detects format and routes to appropriate converter"""
         try:
-            # FIRST: Handle bytes (WebP EXIF data can be bytes)
+            # Handle bytes (WebP EXIF data can be bytes)
             if isinstance(metadata_raw, (bytes, bytearray)):
                 try:
                     metadata_raw = metadata_raw.decode("utf-8", errors="ignore")
                 except Exception:
                     metadata_raw = str(metadata_raw)
 
-            # SECOND: Convert to string safely (handles dict/list/node references)
+            # Convert to string safely (handles dict/list/node references)
             metadata_raw = self.safely_process_value(metadata_raw)
 
-            # THIRD: Now detect format and parse
+            # Now detect format and parse
             format_type = self.detect_format(metadata_raw)
 
             if format_type == "comfyui":
@@ -570,7 +570,7 @@ class SimpleReadableMetadataSG:
 
             positive_prompt = positive_prompt.strip()
 
-            # NOW extract model name from metadata for display at the top
+            # Extract model name from metadata for display at the top
             model_name_display = "N/A"
             if metadata_line:
                 model_match = re.search(r'Model:\s*([^,\n]+)', metadata_line)
@@ -685,7 +685,7 @@ class SimpleReadableMetadataSG:
             except json.JSONDecodeError as e:
                 return f"Error parsing JSON: {str(e)}\n\nPlease ensure the input is valid JSON format."
 
-            # NOW create output and emoji_map AFTER data is ready
+            # Create output and emoji_map
             output = []
 
             emoji_map = {
