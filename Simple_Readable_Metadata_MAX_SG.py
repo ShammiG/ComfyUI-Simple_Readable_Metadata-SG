@@ -28,7 +28,7 @@ class SimpleReadableMetadataMAXSG:
         }
     
     RETURN_TYPES = ("STRING", "IMAGE", "MASK", "INT", "INT", "FLOAT", "FLOAT", "FLOAT", "STRING", "STRING", "STRING", "INT", "INT", "FLOAT", comfy.samplers.KSampler.SAMPLERS, comfy.samplers.KSampler.SCHEDULERS, "STRING")
-    RETURN_NAMES = ("Simple_Readable_Metadata", "image", "mask", "width", "height", "width_ratio", "height_ratio", "Resolution_in_MP", "metadata_raw", "Positive_Prompt", "Negative_Prompt", "seed", "steps", "cfg_scale", "sampler", "scheduler", "filename")
+    RETURN_NAMES = ("Simple_Readable_Metadata", "image", "mask", "width", "height", "width_ratio", "height_ratio", "Resolution_in_MP", "metadata_raw", "Positive_Prompt", "Negative_Prompt", "seed", "steps", "cfg_scale", "sampler", "scheduler", "file_name_text")
     FUNCTION = "load_analyze_extract"
     OUTPUT_NODE = True
     
@@ -356,12 +356,12 @@ class SimpleReadableMetadataMAXSG:
                 file_size_bytes = os.path.getsize(image_path)
                 file_size_mb = float(file_size_bytes) / (1024 * 1024)
                 self._current_image_path = os.path.basename(image_path)
-                # Extract filename without extension for Save Image node compatibility
-                filename_without_ext = os.path.splitext(os.path.basename(image_path))[0]
+                
+                file_name_text_without_ext = os.path.splitext(os.path.basename(image_path))[0]
                 self._current_file_size = file_size_mb
             except:
                 file_size_mb = 0.0
-                filename_without_ext = "unknown"
+                file_name_text_without_ext = "unknown"
             
             def gcd(a, b):
                 while b:
@@ -415,7 +415,7 @@ class SimpleReadableMetadataMAXSG:
             line3 = f"File Size: {file_size_mb:.2f}MB"
             
             lines = [line1, line2, line3]
-            lines.append("")  # empty line for spacing
+            lines.append("")
             
             line4 = f"Model: {model_name}"
             lines.append(line4)
@@ -464,9 +464,9 @@ class SimpleReadableMetadataMAXSG:
             return {
                 "ui": {"text": lines},
                 "result": (Simple_Readable_Metadata, image_tensor, mask, width, height, width_ratio, height_ratio, resolution_mp,
-                          metadata_raw, positive, negative, seed_int, steps_int, cfg_float, sampler_converted, scheduler_converted, filename_without_ext)
+                        metadata_raw, positive, negative, seed_int, steps_int, cfg_float, sampler_converted, scheduler_converted, file_name_text_without_ext)
             }
-        
+
         except Exception as e:
             print(f"Error in load_analyze_extract: {e}")
             raise
@@ -493,7 +493,7 @@ class SimpleReadableMetadataMAXSG:
         if "parameters" in png_info:
             return png_info["parameters"]
         
-        # Check for EXIF data in WebP (THIS IS THE KEY CHANGE)
+        # Check for EXIF data in WebP
         if "exif" in png_info:
             try:
                 exif_bytes = png_info["exif"]
@@ -856,9 +856,9 @@ class SimpleReadableMetadataMAXSG:
                 except:
                     ratio_display = "N/A"
                 
-                # Filename
+                # file_name_text
                 if image_path:
-                    output.insert(2, f"Filename: {image_path}")
+                    output.insert(2, f"file_name_text: {image_path}")
                     output.insert(3, "")
                 
                 # Dimensions, resolution, ratio, and file size
