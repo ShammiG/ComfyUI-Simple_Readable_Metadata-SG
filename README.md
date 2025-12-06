@@ -15,7 +15,7 @@
 ---
 Simple Readable Metadata-SG Nodes Info
 ---
-# Big Update: View Metadata of video file too. (12 dec. 2025)
+# Big Update: View Metadata of video file too. ( 6 dec. 2025)
 
 ---
 Nodes Info:
