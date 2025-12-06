@@ -1,6 +1,6 @@
 # ComfyUI Simple Readable Metadata-SG     
-Extract and View Image Metadata of ComfyUI **as well as of ForgeUI or Automatic 1111 generated images** in Easily Readable Format         
-**Supports PNG as well as WEBP formats**
+**Extract and View Image as well as Video Metadata of ComfyUI as well as of ForgeUI or Automatic 1111 generated images in Easily Readable Format as well as raw metadata**             
+**Supports PNG as well as WEBP formats for images and  mp4 and webm for video**
 
 #    ❗Attention❗
 **Switch Node 2.0 OFF, If comfyUI version 0.3.76 or newer**
@@ -15,55 +15,78 @@ Extract and View Image Metadata of ComfyUI **as well as of ForgeUI or Automatic 
 ---
 Simple Readable Metadata-SG Nodes Info
 ---
+# Big Update: View Metadata of video file too. (12 dec. 2025)
 
-**Has Four nodes:**        
+---
+Nodes Info:
+---
+
+**Has Five nodes:**        
 **1. Simple_Readable_Metadata-SG**            
-**2. Simple_Readable_Metadata_MAX-SG**              
-**3. Simple_Readable_Metadata_Text_Viewer_SG**   
-**4. Simple_Readable_Metadata_Save_Text_SG**
+**2. Simple_Readable_Metadata_VIDEO_SG**              
+**3. Simple_Readable_Metadata_Text_Viewer_SG**      
+**4. Simple_Readable_Metadata_Save_Text_SG**      
+**5. Simple_Readable_Metadata_MAX-SG**     
 <br>
 
 ***● Text Viewer has addtional features, check more details below***        
 # Nodes info:
 **View Image Metadata in Easy Readable Format: like Prompt , LoRa, Model used, Seed, Steps, CFG, Sampler, Scheduler etc. Also supports outputs for these as well as showing Raw Metadata.** 
+
 <br>
 <img width="1464" height="953" alt="Screenshot 2025-11-18 224946" src="https://github.com/user-attachments/assets/45f05602-ea2f-4fc5-a867-3c0551841c37" />
 
 <br>
 <br>
 
-# Update:
+# Update 2.0.0:
+● **Added New Node: Simple_Readable_Metadata (Video):** Extract prompt, model used, lora used, scheduler, sampler, steps, CFG **now for mp4 and webm videos too**       
+● **Updated Text Viewer to include font size:** Updated the text viewer, now you can select font size. [it's included from ComfyUI-Text Tools-SG](https://github.com/ShammiG/ComfyUI_Text_Tools_SG)          
+● **added filename_output to all extracting nodes**
 
-**Added new node: Simple_Readable_Metadata_Save text** -- Save text in .txt or .json format (optional pretty json)
+# Update 1.5.0:
+
+**Added new node: Simple_Readable_Metadata_Save text** -- Save text in .txt or .json format (optional pretty json) [included Part of ComfyUI-Text Tools-SG](https://github.com/ShammiG/ComfyUI_Text_Tools_SG)
 <br>
-# Update : 
+# Update 1.0.1: 
 
-**1. Added support for WEBP format:** Now also extracts and displays metadata from WEBP images.           
-**2. Filename and Filesize:** Also shows filename and filesize at the top, in the output of Simple_Readable_Metadata      
-**3. New output for filename:** New output for filename (can be connnected to SaveImage node or text viewer node.)
+● **Added support for WEBP format:** Now also extracts and displays metadata from WEBP images.           
+● **Filename and Filesize:** Also shows filename and filesize at the top, in the output of Simple_Readable_Metadata      
+● **New output for filename:** New output for filename (can be connnected to SaveImage node or text viewer node.)
 <br>
 <br>
 
-# Details:
+# All Nodes' Details:
 
-**1. Simple_Readable_Metadata-SG** : Has limited outputs        
+**1. Simple_Readable_Metadata-SG** : Has limited outputs for image      
 <br>
 
 <img width="1334" height="519" alt="Screenshot 2025-11-15 104842" src="https://github.com/user-attachments/assets/7f914696-dbc2-4773-b265-a6ccc9d10915" />     
 <br>
 <br>
 
-**2. Simple_Readable_Metadata_MAX-SG** : Has **Lot** of outputs
+**2. Simple_Readable_Metadata_VIDEO_SG:** Now extract all the prompt info and everything **for videos too.**       
+
+<br>
+
+https://github.com/user-attachments/assets/450e6d77-3634-45b2-b4f5-aa130d32f402
+
+**3. Simple_Readable_Metadata_Save_Text_SG:** Node for saving text file or in json for raw metadata 
+
+
+**4. Simple_Readable_Metadata_MAX-SG** : Has **Lot** of outputs
 <br>
 
 <img width="1229" height="770" alt="Screenshot 2025-11-15 104947" src="https://github.com/user-attachments/assets/d0b55db6-001c-495d-b835-cd0b6975ac94" />
 <br>
 <br>
 
-**3. Simple_Readable_Metadata_Text_Viewer-SG:** Text Viewer with export text to file, copy text, select text, delete text, day/night theme etc.
+**5. Simple_Readable_Metadata_Text_Viewer-SG:** Text Viewer with export text to file, copy text, select text, delete text, day/night theme etc.
+
 <br>
 
-<img width="713" height="983" alt="Screenshot 2025-11-15 113923" src="https://github.com/user-attachments/assets/186e207e-a38c-4228-a025-de214553e851" />
+<img width="783" height="1188" alt="Screenshot 2025-12-06 201653" src="https://github.com/user-attachments/assets/a99605e6-f748-405d-a7e5-3bfe2d9d7818" />
+
 <br>
 <br>
 
@@ -80,10 +103,6 @@ Simple Readable Metadata-SG Nodes Info
 ↔️&ensp; &ensp;**Toggle Text Wrapping**          
           
 ***❗NOTE Pasted/ Viewed Text WILL BE Over-written if input node is connected***
-<br>
-<br>
-
-**4. Simple_Readable_Metadata_Save_Text_SG:** Simple Save Text node, save file in .txt or .json format (inlucding optional pretty json)
 <br>
 <br>
 
