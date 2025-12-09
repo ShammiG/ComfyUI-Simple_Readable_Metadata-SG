@@ -378,140 +378,284 @@ app.registerExtension({
             deleteAllBtn.style.flexShrink = "0";
             deleteAllBtn.style.flexBasis = "24px";
 
-            deleteAllBtn.onclick = () => {
-                const confirmDialog = document.createElement("div");
-                confirmDialog.style.position = "fixed";
-                confirmDialog.style.top = "0";
-                confirmDialog.style.left = "0";
-                confirmDialog.style.width = "100%";
-                confirmDialog.style.height = "100%";
-                confirmDialog.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
-                confirmDialog.style.display = "flex";
-                confirmDialog.style.justifyContent = "center";
-                confirmDialog.style.alignItems = "center";
-                confirmDialog.style.zIndex = "10000";
+            deleteAllBtn.style.opacity = "1";
 
-                const dialogBox = document.createElement("div");
-                dialogBox.style.backgroundColor = "#2d2d2d";
-                dialogBox.style.border = "3px solid #ff6b6b";
-                dialogBox.style.borderRadius = "8px";
-                dialogBox.style.padding = "25px";
-                dialogBox.style.minWidth = "350px";
-                dialogBox.style.maxWidth = "500px";
-                dialogBox.style.boxShadow = "0 4px 20px rgba(0, 0, 0, 0.5)";
+            // === DELETE CONFIRMATION CONTROLS (Inline) ===
+            const deleteConfirmControls = document.createElement("div");
+            deleteConfirmControls.style.position = "absolute";
+            deleteConfirmControls.style.top = "49px"; 
+            deleteConfirmControls.style.left = "0";
+            deleteConfirmControls.style.right = "0";
+            deleteConfirmControls.style.display = "none";
+            deleteConfirmControls.style.flexDirection = "column";
+            deleteConfirmControls.style.gap = "10px";
+            deleteConfirmControls.style.padding = "12px";
+            deleteConfirmControls.style.backgroundColor = "rgba(0, 0, 0, 0.9)";
+            deleteConfirmControls.style.border = "3px solid #ff6b6b";
+            deleteConfirmControls.style.borderRadius = "4px";
+            deleteConfirmControls.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.5)";
+            deleteConfirmControls.style.zIndex = "15";
+            deleteConfirmControls.style.backdropFilter = "blur(4px)";
 
-                const message = document.createElement("div");
-                message.textContent = "Are you sure you want to delete all text? This action cannot be undone.";
-                message.style.color = "#ffffff";
-                message.style.fontSize = "16px";
-                message.style.marginBottom = "20px";
-                message.style.lineHeight = "1.5";
-                message.style.textAlign = "center";
+            // Warning message
+            const deleteMessage = document.createElement("div");
+            deleteMessage.textContent = "⚠️ Delete all text? This cannot be undone.";
+            deleteMessage.style.fontSize = "13px";
+            deleteMessage.style.color = "#ff6b6b";
+            deleteMessage.style.fontWeight = "bold";
+            deleteMessage.style.textAlign = "center";
+            deleteMessage.style.fontFamily = "monospace";
 
-                const buttonContainer = document.createElement("div");
-                buttonContainer.style.display = "flex";
-                buttonContainer.style.gap = "10px";
-                buttonContainer.style.justifyContent = "center";
+            // Button container
+            const deleteButtonContainer = document.createElement("div");
+            deleteButtonContainer.style.display = "flex";
+            deleteButtonContainer.style.gap = "10px";
+            deleteButtonContainer.style.justifyContent = "center";
 
-                const confirmBtn = document.createElement("button");
-                confirmBtn.textContent = "Delete All";
-                confirmBtn.style.padding = "10px 20px";
-                confirmBtn.style.fontSize = "14px";
-                confirmBtn.style.fontWeight = "bold";
-                confirmBtn.style.backgroundColor = "#ff6b6b";
-                confirmBtn.style.color = "#ffffff";
-                confirmBtn.style.border = "none";
-                confirmBtn.style.borderRadius = "5px";
-                confirmBtn.style.cursor = "pointer";
-                confirmBtn.onmouseover = () => { confirmBtn.style.backgroundColor = "#ff5252"; };
-                confirmBtn.onmouseout = () => { confirmBtn.style.backgroundColor = "#ff6b6b"; };
+            // Confirm Delete button
+            const confirmDeleteBtn = document.createElement("button");
+            confirmDeleteBtn.textContent = "Delete All";
+            confirmDeleteBtn.style.fontSize = "12px";
+            confirmDeleteBtn.style.padding = "6px 16px";
+            confirmDeleteBtn.style.cursor = "pointer";
+            confirmDeleteBtn.style.border = "2px solid #ff6b6b";
+            confirmDeleteBtn.style.borderRadius = "3px";
+            confirmDeleteBtn.style.backgroundColor = "#ff6b6b";
+            confirmDeleteBtn.style.color = "#fff";
+            confirmDeleteBtn.style.fontWeight = "bold";
 
-                const cancelBtn = document.createElement("button");
-                cancelBtn.textContent = "Cancel";
-                cancelBtn.style.padding = "10px 20px";
-                cancelBtn.style.fontSize = "14px";
-                cancelBtn.style.fontWeight = "bold";
-                cancelBtn.style.backgroundColor = "#555555";
-                cancelBtn.style.color = "#ffffff";
-                cancelBtn.style.border = "none";
-                cancelBtn.style.borderRadius = "5px";
-                cancelBtn.style.cursor = "pointer";
-                cancelBtn.onmouseover = () => { cancelBtn.style.backgroundColor = "#666666"; };
-                cancelBtn.onmouseout = () => { cancelBtn.style.backgroundColor = "#555555"; };
+            // Cancel button
+            const cancelDeleteBtn = document.createElement("button");
+            cancelDeleteBtn.textContent = "Cancel";
+            cancelDeleteBtn.style.fontSize = "12px";
+            cancelDeleteBtn.style.padding = "6px 16px";
+            cancelDeleteBtn.style.cursor = "pointer";
+            cancelDeleteBtn.style.border = "2px solid #555";
+            cancelDeleteBtn.style.borderRadius = "3px";
+            cancelDeleteBtn.style.backgroundColor = "#333";
+            cancelDeleteBtn.style.color = "#fff";
+            cancelDeleteBtn.style.fontWeight = "bold";
 
-                confirmBtn.onclick = () => {
-                    document.body.removeChild(confirmDialog);
-                    box.value = "";
+            // Hover effects
+            confirmDeleteBtn.onmouseenter = () => confirmDeleteBtn.style.backgroundColor = "#ff5252";
+            confirmDeleteBtn.onmouseleave = () => confirmDeleteBtn.style.backgroundColor = "#ff6b6b";
+            cancelDeleteBtn.onmouseenter = () => cancelDeleteBtn.style.backgroundColor = "#666";
+            cancelDeleteBtn.onmouseleave = () => cancelDeleteBtn.style.backgroundColor = "#333";
 
-                    if (!this.properties) {
-                        this.properties = {};
-                    }
+            // Assemble controls
+            deleteButtonContainer.appendChild(confirmDeleteBtn);
+            deleteButtonContainer.appendChild(cancelDeleteBtn);
+            deleteConfirmControls.appendChild(deleteMessage);
+            deleteConfirmControls.appendChild(deleteButtonContainer);
 
-                    this._tv_original_text = "";
-                    this._tv_pretty_json_text = "";
-                    this.properties.text = "";
-                    this.properties.pretty_json_text = "";
+            // Delete execution function
+            const executeDelete = () => {
+                box.value = "";
+                if (!this.properties) this.properties = {};
+                
+                this._tv_original_text = "";
+                this._tv_pretty_json_text = "";
+                this.properties.text = "";
+                this.properties.pretty_json_text = "";
+                
+                const textWidget = this.widgets?.find(w => w.name === "text");
+                if (textWidget) textWidget.value = "";
 
-                    const textWidget = this.widgets?.find(w => w.name === "text");
-                    if (textWidget) {
-                        textWidget.value = "";
-                    }
+                this._updateCounter();
+                
+                // Clear filters
+                if (this._tv_filter_input) this._tv_filter_input.value = "";
+                if (this._tv_line_filter_input) this._tv_line_filter_input.value = "";
+                
+                // Reset modes
+                this.properties.pretty_json_mode = false;
+                if (prettyJsonBtn) prettyJsonBtn.style.opacity = "0.5";
+                
+                // Clear highlights
+                if (this._tv_highlight_div) this._tv_highlight_div.innerHTML = '';
+                this._tv_match_positions = [];
+                if (matchCounter) matchCounter.textContent = "0 / 0";
+                if (lineMatchCounter) lineMatchCounter.textContent = "0 lines";
 
-                    this._updateCounter();
+                // Close dialog
+                deleteConfirmControls.style.display = "none";
+                deleteAllBtn.style.opacity = "1";
+                this._updateTextPadding();
 
-                    if (this._tv_filter_input) {
-                        this._tv_filter_input.value = "";
-                    }
-
-                    if (this._tv_line_filter_input) {
-                        this._tv_line_filter_input.value = "";
-                    }
-
-                    this.properties.pretty_json_mode = false;
-                    if (prettyJsonBtn) {
-                        prettyJsonBtn.style.opacity = "0.5";
-                    }
-
-                    if (this._tv_highlight_div) {
-                        this._tv_highlight_div.innerHTML = '';
-                    }
-
-                    this._tv_match_positions = [];
-                    if (this._tv_match_counter) {
-                        this._tv_match_counter.textContent = "0 / 0";
-                    }
-
-                    if (this._tv_line_match_counter) {
-                        this._tv_line_match_counter.textContent = "0 lines";
-                    }
-
-                    deleteAllBtn.textContent = "✓";
-                    setTimeout(() => {
-                        deleteAllBtn.textContent = "🗑️";
-                    }, 1500);
-                };
-
-                cancelBtn.onclick = () => {
-                    document.body.removeChild(confirmDialog);
-                };
-
-                buttonContainer.appendChild(confirmBtn);
-                buttonContainer.appendChild(cancelBtn);
-                dialogBox.appendChild(message);
-                dialogBox.appendChild(buttonContainer);
-                confirmDialog.appendChild(dialogBox);
-                document.body.appendChild(confirmDialog);
-
-                const handleEscape = (e) => {
-                    if (e.key === "Escape") {
-                        if (document.body.contains(confirmDialog)) {
-                            document.body.removeChild(confirmDialog);
-                        }
-                        document.removeEventListener("keydown", handleEscape);
-                    }
-                };
-                document.addEventListener("keydown", handleEscape);
+                // Success feedback
+                deleteAllBtn.textContent = "✓";
+                setTimeout(() => { deleteAllBtn.textContent = "🗑️"; }, 1500);
             };
+
+            // Cancel function
+            const cancelDelete = () => {
+                deleteConfirmControls.style.display = "none";
+                deleteAllBtn.style.opacity = "1";
+                this._updateTextPadding();
+            };
+
+            // Button handlers
+            confirmDeleteBtn.onclick = executeDelete;
+            cancelDeleteBtn.onclick = cancelDelete;
+
+            // Main Delete Button Click (Toggle)
+            deleteAllBtn.onclick = () => {
+                const isVisible = deleteConfirmControls.style.display === "flex";
+                
+                // Close other controls (like Font Size) if we are opening Delete
+                if (!isVisible) {
+                    if (typeof textSizeControls !== 'undefined') textSizeControls.style.display = 'none';
+                    if (typeof textSizeBtn !== 'undefined') textSizeBtn.style.opacity = '1';
+                    if (highlightControls) highlightControls.style.display = 'none';
+                    if (filterControls) filterControls.style.display = 'none';
+                }
+
+                deleteConfirmControls.style.display = isVisible ? "none" : "flex";
+                deleteAllBtn.style.opacity = isVisible ? "1" : "0.5";
+                
+                this._updateTextPadding();
+            };
+           
+            // ============ TEXT SIZE BUTTON ============
+            const textSizeBtn = document.createElement("button");
+            textSizeBtn.textContent = "Aa";
+            textSizeBtn.title = "Text Size (6-72)";
+            textSizeBtn.style.fontSize = "12px";
+            textSizeBtn.style.padding = "1px 4px";
+            textSizeBtn.style.cursor = "pointer";
+            textSizeBtn.style.minWidth = "24px";
+            textSizeBtn.style.width = "24px";
+            textSizeBtn.style.flexShrink = "0";
+            textSizeBtn.style.fontWeight = "bold";
+            textSizeBtn.style.flexBasis = "24px";
+            textSizeBtn.style.opacity = "1";
+
+            // Text size controls (inline popup)
+            const textSizeControls = document.createElement("div");
+            textSizeControls.style.position = "absolute";
+            textSizeControls.style.top = "49px";
+            textSizeControls.style.left = "0";
+            textSizeControls.style.right = "0";
+            textSizeControls.style.display = "none";
+            textSizeControls.style.flexDirection = "row";
+            textSizeControls.style.gap = "5px";
+            textSizeControls.style.alignItems = "center";
+            textSizeControls.style.padding = "8px";
+            textSizeControls.style.backgroundColor = "rgba(0, 0, 0, 0.85)";
+            textSizeControls.style.border = "3px solid #4CAF50";
+            textSizeControls.style.borderRadius = "4px";
+            textSizeControls.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.5)";
+            textSizeControls.style.zIndex = "15";
+            textSizeControls.style.backdropFilter = "blur(4px)";
+
+            // Label
+            const textSizeLabel = document.createElement("span");
+            textSizeLabel.textContent = "Text Size:";
+            textSizeLabel.style.fontSize = "13px";
+            textSizeLabel.style.color = "#4CAF50";
+            textSizeLabel.style.fontWeight = "bold";
+            textSizeLabel.style.fontFamily = "monospace";
+
+            // Input field
+            const textSizeInput = document.createElement("input");
+            textSizeInput.type = "number";
+            textSizeInput.min = "6";
+            textSizeInput.max = "72";
+            textSizeInput.value = this.properties.font_size ?? 14;
+            textSizeInput.style.width = "60px";
+            textSizeInput.style.height = "28px";
+            textSizeInput.style.boxSizing = "border-box";
+            textSizeInput.style.fontFamily = "monospace";
+            textSizeInput.style.fontSize = "12px";
+            textSizeInput.style.padding = "4px";
+            textSizeInput.style.border = "2px solid #555";
+            textSizeInput.style.borderRadius = "3px";
+            textSizeInput.style.backgroundColor = "#1e1e1e";
+            textSizeInput.style.color = "#d4d4d4";
+
+            // Apply button
+            const applyBtn = document.createElement("button");
+            applyBtn.textContent = "Apply";
+            applyBtn.style.fontSize = "12px";
+            applyBtn.style.padding = "4px 12px";
+            applyBtn.style.cursor = "pointer";
+            applyBtn.style.border = "2px solid #4CAF50";
+            applyBtn.style.borderRadius = "3px";
+            applyBtn.style.backgroundColor = "#4CAF50";
+            applyBtn.style.color = "#fff";
+            applyBtn.style.fontWeight = "bold";
+
+            // Close button
+            const closeBtn = document.createElement("button");
+            closeBtn.textContent = "✕";
+            closeBtn.style.fontSize = "14px";
+            closeBtn.style.padding = "4px 8px";
+            closeBtn.style.cursor = "pointer";
+            closeBtn.style.border = "2px solid #555";
+            closeBtn.style.borderRadius = "3px";
+            closeBtn.style.backgroundColor = "#333";
+            closeBtn.style.color = "#fff";
+            closeBtn.style.fontWeight = "bold";
+
+            // Assemble controls
+            textSizeControls.appendChild(textSizeLabel);
+            textSizeControls.appendChild(textSizeInput);
+            textSizeControls.appendChild(applyBtn);
+            textSizeControls.appendChild(closeBtn);
+
+            // Apply size function
+            const applySize = () => {
+                const sizeNum = parseInt(textSizeInput.value);
+                if (!isNaN(sizeNum) && sizeNum >= 6 && sizeNum <= 72) {
+                    this.properties.font_size = sizeNum;
+                    box.style.fontSize = `${sizeNum}px`;
+                    if (highlightDiv) highlightDiv.style.fontSize = `${sizeNum}px`;
+                    textSizeControls.style.display = 'none';
+                    textSizeBtn.style.opacity = '1';
+                    this._updateTextPadding();
+                } else {
+                    textSizeInput.style.borderColor = '#f44336';
+                    setTimeout(() => textSizeInput.style.borderColor = '#555', 1000);
+                }
+            };
+
+            // Close function
+            const closeTextSize = () => {
+                textSizeControls.style.display = "none";
+                textSizeBtn.style.opacity = "1";
+                this._updateTextPadding();
+            };
+
+            // Button click handlers
+            applyBtn.onclick = applySize;
+            closeBtn.onclick = closeTextSize;
+
+            // Enter to apply, Escape to close
+            textSizeInput.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    applySize();
+                } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    closeTextSize();
+                }
+            });
+
+            // Toggle text size controls
+            textSizeBtn.onclick = () => {
+                const isVisible = textSizeControls.style.display === "flex";
+                textSizeControls.style.display = isVisible ? "none" : "flex";
+                textSizeBtn.style.opacity = isVisible ? "1" : "0.5";
+                
+                if (!isVisible) {
+                    textSizeInput.value = this.properties.font_size || 14;
+                    setTimeout(() => textSizeInput.focus(), 100);
+                    // Force update padding to show controls
+                    this._updateTextPadding();
+                } else {
+                    this._updateTextPadding();
+                }
+            };      
 
             // Append buttons to button bar in order
             buttonBarContainer.appendChild(deleteAllBtn);
@@ -524,6 +668,7 @@ app.registerExtension({
             buttonBarContainer.appendChild(prettyJsonBtn);
             buttonBarContainer.appendChild(themeBtn);
             buttonBarContainer.appendChild(wrapBtn);
+            buttonBarContainer.appendChild(textSizeBtn);           
 
             // Wrapper for textarea and overlays
             const textareaWrapper = document.createElement("div");
@@ -537,6 +682,9 @@ app.registerExtension({
             textareaWrapper.appendChild(highlightDiv);
             textareaWrapper.appendChild(counterContainer);
             textareaWrapper.appendChild(buttonBarContainer);
+            textareaWrapper.appendChild(textSizeControls);
+            textareaWrapper.appendChild(deleteConfirmControls);
+
 
             // ============ HIGHLIGHT CONTROLS ============
             const highlightControls = document.createElement("div");
@@ -701,19 +849,45 @@ app.registerExtension({
             this._tv_line_filter_input = lineFilterInput;
             this._tv_filter_controls = filterControls;
             this._tv_line_match_counter = lineMatchCounter;
+            this._tv_text_size_controls = textSizeControls;
+            this._tv_delete_controls = deleteConfirmControls;
+
+
 
             // ============ DYNAMIC PADDING MANAGEMENT ============
             this._updateTextPadding = () => {
-                const hasControls = this.properties.text_filter || this.properties.line_filter;
+                if (!this.properties) return;
+
+                // Check visibility of various controls
+                const hasTextSize = (this._tv_text_size_controls && this._tv_text_size_controls.style.display === "flex");
+                const hasDelete = (this._tv_delete_controls && this._tv_delete_controls.style.display === "flex");
+                const hasSearch = this.properties.text_filter;
+                const hasFilter = this.properties.line_filter;
+
                 const basePadding = 49;
-                const controlsHeight = 32;
-                const totalPadding = hasControls ? (basePadding + controlsHeight) : basePadding;
+                const controlsHeight = 32; 
+
+                let totalPadding = basePadding;
+
+                if (hasDelete) {
+                    // Delete dialog is taller than normal controls
+                    totalPadding += 80; 
+                } else if (hasSearch || hasFilter || hasTextSize) {
+                    // Standard single-row controls
+                    totalPadding += controlsHeight;
+                }
 
                 box.style.paddingTop = `${totalPadding}px`;
-                highlightDiv.style.paddingTop = `${totalPadding}px`;
-                highlightControls.style.top = `${basePadding}px`;
-                filterControls.style.top = `${basePadding}px`;
+                if (this._tv_highlight_div) this._tv_highlight_div.style.paddingTop = `${totalPadding}px`;
+                
+                // Ensure all controls are positioned correctly below the header
+                if (this._tv_highlight_controls) this._tv_highlight_controls.style.top = `${basePadding}px`;
+                if (this._tv_filter_controls) this._tv_filter_controls.style.top = `${basePadding}px`;
+                if (this._tv_text_size_controls) this._tv_text_size_controls.style.top = `${basePadding}px`;
+                if (this._tv_delete_controls) this._tv_delete_controls.style.top = `${basePadding}px`;
             };
+
+
 
             // Navigation functions for textarea mode
             const navigateToMatch = (index) => {
@@ -1081,6 +1255,7 @@ app.registerExtension({
             info.properties.text_filter = this.properties.text_filter;
             info.properties.line_filter = this.properties.line_filter;
             info.properties.pretty_json_mode = this.properties.pretty_json_mode;
+            info.properties.font_size = this.properties.font_size;
             
             // Save filter inputs
             if (this._tv_filter_input) {
@@ -1113,7 +1288,15 @@ app.registerExtension({
                         this._updateCounter();
                     }
                 }
-                
+                if (info.properties.font_size) {
+                    this.properties.font_size = info.properties.font_size;
+
+                    // Apply saved font size
+                    if (this._tv_box) this._tv_box.style.fontSize = `${this.properties.font_size}px`;
+                    if (this._tv_highlight_div) this._tv_highlight_div.style.fontSize = `${this.properties.font_size}px`;
+                    if (this._tv_markdown_div) this._tv_markdown_div.style.fontSize = `${this.properties.font_size}px`;
+                }
+
                 // Restore filter states
                 if (this._tv_filter_input && info.properties.filter_text) {
                     this._tv_filter_input.value = info.properties.filter_text;
