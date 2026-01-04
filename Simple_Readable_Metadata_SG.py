@@ -19,7 +19,8 @@ class SimpleReadableMetadataSG:
         return {
             "required": {
                 "image": (sorted(files), {"image_upload": True}),
-                "emoji_in_readable_text": ("BOOLEAN", {"default": True})
+                "emoji_in_readable_text": ("BOOLEAN", {"default": True}),
+                "show_info": (["both", "properties", "metadata", "none"], {"default": "both"}),               
             },
             "ui": {
                 "image": {"min_width": 450},
@@ -32,7 +33,7 @@ class SimpleReadableMetadataSG:
     OUTPUT_NODE = True
 
     @classmethod
-    def IS_CHANGED(cls, image, emoji_in_readable_text):
+    def IS_CHANGED(cls, image, emoji_in_readable_text, show_info="both"):
         image_path = folder_paths.get_annotated_filepath(image)
         m = hashlib.sha256()
         with open(image_path, 'rb') as f:
@@ -40,7 +41,8 @@ class SimpleReadableMetadataSG:
         return m.digest().hex()
 
     @classmethod
-    def VALIDATE_INPUTS(cls, image, emoji_in_readable_text):
+    def VALIDATE_INPUTS(cls, image, emoji_in_readable_text, show_info="both"):
+
         if not folder_paths.exists_annotated_filepath(image):
             return "Invalid image file: {}".format(image)
         return True
@@ -257,7 +259,7 @@ class SimpleReadableMetadataSG:
 
         return params
 
-    def load_analyze_extract(self, image, emoji_in_readable_text=True):
+    def load_analyze_extract(self, image, emoji_in_readable_text=True, show_info="both"):
         """Combined function that loads image, analyzes properties, and extracts metadata"""
         try:
             image_path = folder_paths.get_annotated_filepath(image)
@@ -881,24 +883,30 @@ class SimpleReadableMetadataSG:
                     if "CLIPTextEncode" in class_type or "TextEncode" in class_type or "Prompt" in class_type:
                         title = node_data.get("_meta", {}).get("title", "").lower()
                         text_value = inputs.get("text", "")
-
+                        
                         if self.is_node_reference(text_value):
                             continue
-
+                            
                         text_value = self.safely_process_value(text_value)
-
-                        if not text_value or text_value == "N/A" or not text_value.strip():
+                        if not text_value or text_value == "NA" or not text_value.strip():
                             continue
-
-                        is_negative = "negative" in title or "neg" in title
-                        is_positive = ("positive" in title or "prompt" in title) and not is_negative
-
+                        
+                        # --- Smart content-based detection ---
+                        negative_keywords = ["watermark", "bad anatomy", "ugly", "deformed", "disfigured", "blurry", "low quality", "worst quality"]
+                        is_negative_content = any(keyword in text_value.lower() for keyword in negative_keywords)
+                        
+                        is_negative = "negative" in title or "neg" in title or is_negative_content
+                        is_positive = "positive" in title or ("prompt" in title and not is_negative)
+                        
                         if is_negative:
                             negative_candidates.append(text_value)
                         elif is_positive:
-                            positive_candidates.append(text_value)
-                        else:
-                            if not positive_candidates and not negative_candidates:
+                            # --- Priority for custom nodes ---
+                            is_custom_save_node = "SavePositivePromptSG" in class_type or "SaveNegativePromptSG" in class_type
+                            
+                            if is_custom_save_node:
+                                positive_candidates.insert(0, text_value)  # Put custom nodes first
+                            else:
                                 positive_candidates.append(text_value)
                 except Exception as e:
                     continue
@@ -908,10 +916,10 @@ class SimpleReadableMetadataSG:
             if negative_candidates:
                 negative_prompt = negative_candidates[0]
 
-            output.append(f"{emoji_map['prompts']} PROMPTS:")
-            output.append(f"  Positive: {positive_prompt if positive_prompt else '(empty)'}")
+            output.append(f"{emoji_map['prompts']} PROMPTS: |If empty, Check fail-safe below|\n")
+            output.append(f"  Positive:\n           {positive_prompt if positive_prompt else '(empty)'}\n")
             if negative_prompt:
-                output.append(f"  Negative: {negative_prompt}")
+                output.append(f"  Negative:\n           {negative_prompt}")
             output.append("")
 
                         # Extract LoRA models
@@ -1117,7 +1125,19 @@ class SimpleReadableMetadataSG:
                     output.append(f"  {model_type}: {model_name}")
                 output.append("")
             
+            
+            # --- FAIL-SAFE SECTION ---
+            output.append("")
+            output.append("=== ALL DETECTED TEXT IN WORKFLOW ===")
+            output.append("(Fail-safe dump of all text-like values)")
+            output.append("")
+            
+            all_text_dump = self.extract_all_text_content(data)
+            output.append(all_text_dump)
+    
             return "\n".join(output)
+
+
           
         except Exception as e:
             print(f"Error in parse_comfyui_format: {e}")
@@ -1139,66 +1159,80 @@ class SimpleReadableMetadataSG:
         """Extract individual parameters for output connections"""
         positive = ""
         negative = ""
-
+        
         try:
             text = self.safely_process_value(text)
-
+            
             if format_type == "comfyui":
                 clean_text = text.strip()
                 if clean_text.startswith("Prompt: "):
                     clean_text = clean_text[8:]
-
+                
                 try:
                     data = json.loads(clean_text)
+                    
+                    positive_candidates = []
+                    negative_candidates = []
+                    
+                    negative_keywords = ["watermark", "bad anatomy", "ugly", "deformed", "disfigured", "blurry", "low quality", "worst quality"]
 
                     for node_id, node_data in data.items():
                         try:
                             class_type = node_data.get("class_type", "")
-
+                            
                             if "CLIPTextEncode" in class_type or "TextEncode" in class_type or "Prompt" in class_type:
                                 title = node_data.get("_meta", {}).get("title", "").lower()
-
-                                # Try multiple text field names
+                                
                                 text_content = None
                                 for text_key in ["text", "prompt", "conditioning", "string"]:
                                     if text_key in node_data["inputs"]:
                                         text_content = node_data["inputs"].get(text_key)
                                         break
-
-                                if text_content is None:
+                                
+                                if text_content is None or self.is_node_reference(text_content):
                                     continue
-
-                                if self.is_node_reference(text_content):
-                                    continue
-
+                                
                                 text_content = self.safely_process_value(text_content)
-
                                 if not text_content or not text_content.strip():
                                     continue
+                                
+                                # --- SMART LOGIC ---
+                                is_negative_content = any(keyword in text_content.lower() for keyword in negative_keywords)
+                                is_negative_title = any(neg_word in title for neg_word in ["negative", "neg"])
+                                is_positive_title = any(pos_word in title for pos_word in ["positive", "pos"])
 
-                                # Better title matching logic
-                                is_negative = any(neg_word in title for neg_word in ["negative", "neg"])
-                                is_positive = any(pos_word in title for pos_word in ["positive", "pos", "prompt"]) and not is_negative
-
-                                if is_positive or ("prompt" in title and not is_negative):
-                                    if not positive:
-                                        positive = text_content
-                                elif is_negative:
-                                    negative = text_content
-                                elif not positive and not negative:
-                                    # If no title hints, assume first one is positive
-                                    positive = text_content
-
+                                is_negative = is_negative_title or is_negative_content
+                                if is_positive_title: is_negative = False
+                                
+                                # --- PRIORITY LOGIC ---
+                                # Check if this is one of your special "Save" nodes
+                                is_custom_save_node = "SavePositivePromptSG" in class_type or "SaveNegativePromptSG" in class_type
+                                    
+                                if is_negative:
+                                    if is_custom_save_node:
+                                        negative_candidates.insert(0, text_content) # High Priority
+                                    else:
+                                        negative_candidates.append(text_content)    # Normal Priority
+                                else:
+                                    if is_custom_save_node:
+                                        positive_candidates.insert(0, text_content) # High Priority
+                                    else:
+                                        positive_candidates.append(text_content)    # Normal Priority
+                                    
                         except Exception as e:
                             continue
-
+                    
+                    if positive_candidates:
+                        positive = positive_candidates[0]
+                    if negative_candidates:
+                        negative = negative_candidates[0]
+                        
                 except Exception as e:
                     print(f"Error parsing JSON in extract_individual: {e}")
-
+            
             elif format_type == "webui":
                 lines = text.strip().split('\n')
                 metadata_line = ""
-
                 for line in lines:
                     if line.startswith("Negative prompt:"):
                         negative = line.replace("Negative prompt:", "").strip()
@@ -1206,13 +1240,62 @@ class SimpleReadableMetadataSG:
                         metadata_line = line
                     elif not metadata_line and not line.startswith("Negative prompt:"):
                         positive += line + " "
-
                 positive = positive.strip()
-
+        
         except Exception as e:
             print(f"Error in extract_individual_params: {e}")
-
+        
         return positive, negative
+
+
+    
+    def extract_all_text_content(self, data):
+        """Extract ALL text strings from the workflow as a fail-safe"""
+        all_texts = []
+        seen_texts = set()
+        
+        try:
+            for node_id, node_data in data.items():
+                inputs = node_data.get("inputs", {})
+                class_type = node_data.get("class_type", "")
+                
+                # Check for common text keys
+                candidates = []
+                for key in ["text", "string", "prompt", "value", "positive", "negative"]:
+                    if key in inputs:
+                        val = inputs[key]
+                        # Try to resolve if reference
+                        if self.is_node_reference(val):
+                            val = self.resolve_node_reference(data, val)
+                        
+                        val = self.safely_process_value(val)
+                        if val and val != "N/A" and isinstance(val, str):
+                            candidates.append(val)
+                
+                # Filter valid text
+                for text in candidates:
+                    clean_text = text.strip()
+                    # Skip short/irrelevant text or numeric-looking strings if desired
+                    # But for fail-safe, keep almost everything except empty/N/A
+                    if not clean_text or clean_text == "N/A" or clean_text.startswith("[Node Reference"):
+                        continue
+                        
+                    # Skip generic filenames or internal IDs if they look like it
+                    if len(clean_text) < 2: continue
+                    
+                    if clean_text not in seen_texts:
+                        seen_texts.add(clean_text)
+                        # Add a label based on node type
+                        label = f"[{class_type} (ID {node_id})]"
+                        all_texts.append(f"{label}\n{clean_text}")
+        except Exception as e:
+            return f"Error extracting all text: {e}"
+            
+        if not all_texts:
+            return "No text content found in workflow."
+            
+        return "\n\n------\n\n".join(all_texts)
+
 
 
 # Node registration
