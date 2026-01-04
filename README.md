@@ -23,7 +23,7 @@ Nodes Info:
 ---
 
 **Has Six nodes:**        
-**1.** Simple_Readable_Metadata-SG**            
+**1. Simple_Readable_Metadata-SG**            
 **2.** Simple_Readable_Metadata_**VIDEO_SG**              
 **3.** Simple_Readable_Metadata_**Text_Viewer_SG**      
 **4.** Simple_Readable_Metadata_**Save_Text_SG**      
