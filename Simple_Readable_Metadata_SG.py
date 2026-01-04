@@ -893,11 +893,21 @@ class SimpleReadableMetadataSG:
                         
                         # --- Smart content-based detection ---
                         negative_keywords = ["watermark", "bad anatomy", "ugly", "deformed", "disfigured", "blurry", "low quality", "worst quality"]
-                        is_negative_content = any(keyword in text_value.lower() for keyword in negative_keywords)
                         
-                        is_negative = "negative" in title or "neg" in title or is_negative_content
-                        is_positive = "positive" in title or ("prompt" in title and not is_negative)
+                        # Check explicit title indicators first
+                        is_explicit_negative = "negative" in title or "neg" in title
+                        is_explicit_positive = "positive" in title or "pos" in title
                         
+                        if is_explicit_negative:
+                            is_negative = True
+                        elif is_explicit_positive:
+                            is_negative = False
+                        else:
+                            # Only use content detection if title is ambiguous
+                            is_negative = any(keyword in text_value.lower() for keyword in negative_keywords)
+
+                        is_positive = not is_negative
+              
                         if is_negative:
                             negative_candidates.append(text_value)
                         elif is_positive:
