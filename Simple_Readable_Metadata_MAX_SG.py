@@ -20,12 +20,14 @@ class SimpleReadableMetadataMAXSG:
         return {
             "required": {
                 "image": (sorted(files), {"image_upload": True}),
+                "show_info": (["on", "off"],),  # <--- Added this line
                 "emoji_in_readable_text": ("BOOLEAN", {"default": True})
             },
             "ui": {
                 "image": {"min_width": 450},
             },
         }
+
     
     RETURN_TYPES = ("STRING", "IMAGE", "MASK", "INT", "INT", "FLOAT", "FLOAT", "FLOAT", "STRING", "STRING", "STRING", "INT", "INT", "FLOAT", comfy.samplers.KSampler.SAMPLERS, comfy.samplers.KSampler.SCHEDULERS, "STRING")
     RETURN_NAMES = ("Simple_Readable_Metadata", "image", "mask", "width", "height", "width_ratio", "height_ratio", "Resolution_in_MP", "metadata_raw", "Positive_Prompt", "Negative_Prompt", "seed", "steps", "cfg_scale", "sampler", "scheduler", "file_name_text")
@@ -320,7 +322,8 @@ class SimpleReadableMetadataMAXSG:
         
         return params
     
-    def load_analyze_extract(self, image, emoji_in_readable_text=True):
+    def load_analyze_extract(self, image, show_info="on", emoji_in_readable_text=True):
+
         """Combined function that loads image, analyzes properties, and extracts metadata"""
         try:
             image_path = folder_paths.get_annotated_filepath(image)
@@ -461,11 +464,17 @@ class SimpleReadableMetadataMAXSG:
             scheduler_str = gen_params['scheduler']
             scheduler_converted = self.convert_scheduler_string_to_comfyui_type(scheduler_str)
             
+        # Check if show_info is "off"
+            if show_info == "off":
+                lines = []
+
             return {
                 "ui": {"text": lines},
                 "result": (Simple_Readable_Metadata, image_tensor, mask, width, height, width_ratio, height_ratio, resolution_mp,
                         metadata_raw, positive, negative, seed_int, steps_int, cfg_float, sampler_converted, scheduler_converted, file_name_text_without_ext)
             }
+
+
 
         except Exception as e:
             print(f"Error in load_analyze_extract: {e}")
@@ -1281,6 +1290,14 @@ class SimpleReadableMetadataMAXSG:
                 for model_type, model_name in sorted_models:
                     output.append(f"  {model_type}: {model_name}")
                 output.append("")
+
+            # --- FAIL-SAFE SECTION ---
+            output.append("")
+            output.append("=== ALL DETECTED TEXT IN WORKFLOW ===")
+            output.append("(Fail-safe dump of all text-like values)")
+            output.append("")
+            all_text_dump = self.extract_all_text_content(data)
+            output.append(all_text_dump)               
             
             return "\n".join(output)
         
@@ -1352,7 +1369,7 @@ class SimpleReadableMetadataMAXSG:
                                 if not text_content or not text_content.strip():
                                     continue
                                 
-                                # Better title matching logic
+                                # Title matching logic
                                 is_negative = any(neg_word in title for neg_word in ["negative", "neg"])
                                 is_positive = any(pos_word in title for pos_word in ["positive", "pos", "prompt"]) and not is_negative
                                 
@@ -1388,6 +1405,57 @@ class SimpleReadableMetadataMAXSG:
         negative = self.safely_convert_to_string(negative)
         
         return positive, negative
+    
+    def extract_all_text_content(self, data):
+        """Extract ALL text strings from the workflow as a fail-safe"""
+        all_texts = []
+        seen_texts = set()
+        try:
+            for node_id, node_data in data.items():
+                inputs = node_data.get("inputs", {})
+                class_type = node_data.get("class_type", "")
+                
+                # Check for common text keys (Added Flux keys: t5xxl, clip_l)
+                candidates = []
+                text_keys = ["text", "string", "prompt", "value", "positive", "negative", "t5xxl", "clip_l"]
+                
+                for key in text_keys:
+                    if key in inputs:
+                        val = inputs[key]
+                        
+                        # Handle Flux dict-style inputs if present
+                        if isinstance(val, dict):
+                             val = val.get('text', val.get('value', ''))
+
+                        # Try to resolve if reference
+                        if self.is_node_reference(val):
+                            val = self.resolve_node_reference(data, val)
+                        
+                        val = self.safely_process_value(val)
+                        if val and val != "N/A" and isinstance(val, str):
+                            candidates.append(val)
+                            
+                # Filter valid text
+                for text in candidates:
+                    clean_text = text.strip()
+                    # Skip short/irrelevant text
+                    if not clean_text or clean_text == "N/A" or clean_text.startswith("[Node Reference"):
+                        continue
+                    if len(clean_text) < 2: continue
+                    
+                    if clean_text not in seen_texts:
+                        seen_texts.add(clean_text)
+                        label = f"[{class_type} (ID {node_id})]"
+                        all_texts.append(f"{label}\n{clean_text}")
+                        
+        except Exception as e:
+            return f"Error extracting all text: {e}"
+            
+        if not all_texts:
+            return "No text content found in workflow."
+            
+        return "\n\n------\n\n".join(all_texts)
+    
 
 NODE_CLASS_MAPPINGS = {
     "SimpleReadableMetadataMAXSG": SimpleReadableMetadataMAXSG
