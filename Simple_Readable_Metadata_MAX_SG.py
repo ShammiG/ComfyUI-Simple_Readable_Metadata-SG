@@ -643,8 +643,9 @@ class SimpleReadableMetadataMAXSG:
             positive_prompt = positive_prompt.strip()
             
             output.append(f"{emoji_map['prompts']} PROMPTS: |If empty, Check fail-safe below|\n")
-            output.append(f"  Positive: {positive_prompt if positive_prompt else '(empty)'}")
-            output.append(f"  Negative: {negative_prompt if negative_prompt else '(empty)'}")
+            output.append(f"  Positive:\n           {positive_prompt if positive_prompt else '(empty)'}\n")
+            if negative_prompt:
+                output.append(f"  Negative:\n           {negative_prompt}")
             output.append("")
             
             if metadata_line:
