@@ -582,9 +582,10 @@ class SimpleReadableMetadataSG:
             # Display model at the top
             output.append(f"{emoji_map['models']} MODEL: {model_name_display}\n")
 
-            output.append(f"{emoji_map['prompts']} PROMPTS:")
-            output.append(f"  Positive: {positive_prompt if positive_prompt else '(empty)'}")
-            output.append(f"  Negative: {negative_prompt if negative_prompt else '(empty)'}")
+            output.append(f"{emoji_map['prompts']} PROMPTS: |If empty, Check fail-safe below|\n")
+            output.append(f"  Positive:\n           {positive_prompt if positive_prompt else '(empty)'}\n")
+            if negative_prompt:
+                output.append(f"  Negative:\n           {negative_prompt}")
             output.append("")
 
             if metadata_line:
