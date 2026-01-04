@@ -23,12 +23,12 @@ Nodes Info:
 ---
 
 **Has Six nodes:**        
-**1. Simple_Readable_Metadata-SG**            
-**2. Simple_Readable_Metadata_VIDEO_SG**              
-**3. Simple_Readable_Metadata_Text_Viewer_SG**      
-**4. Simple_Readable_Metadata_Save_Text_SG**      
-**5. Simple_Readable_Metadata_MAX-SG**          
-**6. Simple_Readable_Metadata_Save_Prompt_SG** 
+**1.** Simple_Readable_Metadata-SG**            
+**2.** Simple_Readable_Metadata_**VIDEO_SG**              
+**3.** Simple_Readable_Metadata_**Text_Viewer_SG**      
+**4.** Simple_Readable_Metadata_**Save_Text_SG**      
+**5.** Simple_Readable_Metadata_**MAX-SG**          
+**6.** Simple_Readable_Metadata_**Save_Prompt_SG** 
 <br>
 
 ***● Text Viewer has addtional features, check more details below***        
