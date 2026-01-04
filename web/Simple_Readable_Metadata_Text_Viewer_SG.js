@@ -657,6 +657,96 @@ app.registerExtension({
                 }
             };      
 
+            // Copy Positive Prompt button
+            const copyPosBtn = document.createElement("button");
+            copyPosBtn.textContent = "Copy Positive";
+            copyPosBtn.title = "Extract & Copy Positive Prompt";
+            copyPosBtn.style.fontSize = "10px";
+            copyPosBtn.style.padding = "1px 2px";
+            copyPosBtn.style.cursor = "pointer";
+            copyPosBtn.style.minWidth = "50px";
+            copyPosBtn.style.width = "50px";
+            copyPosBtn.style.flexShrink = "0";
+            copyPosBtn.style.flexBasis = "24px";
+
+            copyPosBtn.onclick = () => {
+                const text = box.value;
+                let positivePrompt = "";
+                
+                // METHOD 1: Line-by-line state machine parser (Safest)
+                const lines = text.split('\n');
+                let capturing = false;
+                let buffer = [];
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    
+                    // Start capturing when we see "Positive:"
+                    if (line.trim().startsWith("Positive:")) {
+                        capturing = true;
+                        // Remove "Positive:" prefix from the first line
+                        let content = line.substring(line.indexOf("Positive:") + 9).trim();
+                        if (content) buffer.push(content);
+                        continue;
+                    }
+                    
+                    if (capturing) {
+                        // STOP capturing conditions:
+                        // 1. Line starts with "Negative:"
+                        // 2. Line starts with an Emoji (next section)
+                        // 3. Line matches a Section Header style (=== header ===)
+                        // 4. Empty line (often separates prompts from next section)
+                        
+                        const trimmed = line.trim();
+                        if (trimmed.startsWith("Negative:") || 
+                            trimmed.startsWith("Negative prompt:") ||
+                            /^(===|[\u{1F300}-\u{1F9FF}]|Step|Size|Model)/u.test(trimmed)) {
+                            break;
+                        }
+                        
+                        // If it's just an empty line, it MIGHT be the end, or just a paragraph break.
+                        // But usually ComfyUI prompts are dense blocks.
+                        // Let's assume a double-newline (empty line) ends the prompt section.
+                        if (trimmed === "") {
+                            break; 
+                        }
+                        
+                        buffer.push(line);
+                    }
+                }
+                
+                if (buffer.length > 0) {
+                    positivePrompt = buffer.join("\n").trim();
+                } 
+                // METHOD 2: Fallback for A1111 raw format (where prompt is at the very top)
+                else if (text.indexOf("Steps:") !== -1 || text.indexOf("Negative prompt:") !== -1) {
+                    const negIndex = text.indexOf("Negative prompt:");
+                    const stepsIndex = text.indexOf("Steps:");
+                    let cutIndex = text.length;
+                    
+                    if (negIndex !== -1) cutIndex = Math.min(cutIndex, negIndex);
+                    if (stepsIndex !== -1) cutIndex = Math.min(cutIndex, stepsIndex);
+                    
+                    if (cutIndex < text.length) {
+                        positivePrompt = text.substring(0, cutIndex).trim();
+                    }
+                }
+
+                // Clean up
+                if (positivePrompt === "(empty)") positivePrompt = "";
+
+                if (positivePrompt) {
+                    navigator.clipboard.writeText(positivePrompt);
+                    copyPosBtn.textContent = "✓";
+                    setTimeout(() => { copyPosBtn.textContent = "+P"; }, 1500);
+                } else {
+                    copyPosBtn.textContent = "✗";
+                    setTimeout(() => { copyPosBtn.textContent = "+P"; }, 1500);
+                }
+            };
+
+
+
             // Append buttons to button bar in order
             buttonBarContainer.appendChild(deleteAllBtn);
             buttonBarContainer.appendChild(copyBtn);
@@ -668,7 +758,8 @@ app.registerExtension({
             buttonBarContainer.appendChild(prettyJsonBtn);
             buttonBarContainer.appendChild(themeBtn);
             buttonBarContainer.appendChild(wrapBtn);
-            buttonBarContainer.appendChild(textSizeBtn);           
+            buttonBarContainer.appendChild(textSizeBtn);
+            buttonBarContainer.appendChild(copyPosBtn);           
 
             // Wrapper for textarea and overlays
             const textareaWrapper = document.createElement("div");
