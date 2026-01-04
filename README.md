@@ -15,18 +15,20 @@
 ---
 Simple Readable Metadata-SG Nodes Info
 ---
-# Big Update: View Metadata of video file too. ( 6 dec. 2025)
-
+# Big Update: New Node to Save Prompt, show ALL text from old images and more ( 4 Jan. 2025)
+  **Check Details Below**      
+   
 ---
 Nodes Info:
 ---
 
-**Has Five nodes:**        
+**Has Six nodes:**        
 **1. Simple_Readable_Metadata-SG**            
 **2. Simple_Readable_Metadata_VIDEO_SG**              
 **3. Simple_Readable_Metadata_Text_Viewer_SG**      
 **4. Simple_Readable_Metadata_Save_Text_SG**      
-**5. Simple_Readable_Metadata_MAX-SG**     
+**5. Simple_Readable_Metadata_MAX-SG**          
+**6. Simple_Readable_Metadata_Save_Prompt_SG** 
 <br>
 
 ***● Text Viewer has addtional features, check more details below***        
@@ -38,6 +40,18 @@ Nodes Info:
 
 <br>
 <br>
+
+# Update 2.5.0:       
+By default, if comfyUI CLIP Text Encode Node's text box's input is connected, it will show up as (empty) in the Simple_Readable_Metadata output.         
+These two fixes try to overcome that. **One for future, One for old.**          
+● **Simple_Readable_Metadata_Save_Prompt_SG:** A **new node** for future workflows inject Positive prompt in metadata.                
+Basically add this to the Final Text output just before the CLIP Text Encode Prompt Node's text box.                        
+This will add the prompt to the metadata such that it is readable by Simple_Readable_Metadata.       
+● **Implement Show All Text in Workflow:** A similar attempt to be able to see prompt from **old images** whose CLIP text encode box had input connected.         
+This basically dumps all the text info present in the workflow, so you can look for prompts.         
+● **Copy Positive Button in Text Viewer Node:** **Copies Positive Prompt directly** without the need to select it (bothered me personally a lot).           
+Make sure to verify the final copied text.         
+● **Added show_info options for display:** You can optionally show/hide properties, metadata or both.
 
 # Update 2.0.0:
 ● **Added New Node: Simple_Readable_Metadata (Video):** Extract prompt, model used, lora used, scheduler, sampler, steps, CFG **now for mp4 and webm videos too**       
@@ -90,7 +104,9 @@ https://github.com/user-attachments/assets/450e6d77-3634-45b2-b4f5-aa130d32f402
 <br>
 <br>
 
-**Text Viewer Features:**       
+**Text Viewer Features:** 
+
+***NEW:*** **Copy Positive:** **Copies Positive Prompt directly** without the need to select it            
 🗑️&emsp;&emsp;**Delete all displayed text**          
 📋&emsp;&emsp;**Copy all or selected text**          
 ✔️&emsp;&emsp;**Select all text**          
