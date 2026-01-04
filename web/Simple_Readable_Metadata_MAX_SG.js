@@ -140,9 +140,8 @@ app.registerExtension({
             nodeType.prototype.onExecuted = function (message) {
                 onExecuted?.apply(this, arguments);
                 // Update imageParamsText from the ui.text response
-                // This will include all 6 lines: resolution, ratio, tensor size, model, seed/steps/cfg, sampler/scheduler
                 if (message.text && Array.isArray(message.text)) {
-                    // Take all lines from the Python backend (should be 6 lines)
+                    // Take all lines from the Python backend 
                     this.imageParamsText = message.text;
                     app.graph.setDirtyCanvas(true, true);
                 }
