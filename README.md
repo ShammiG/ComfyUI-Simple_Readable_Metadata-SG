@@ -36,7 +36,7 @@ Nodes Info:
 **View Image Metadata in Easy Readable Format: like Prompt , LoRa, Model used, Seed, Steps, CFG, Sampler, Scheduler etc. Also supports outputs for these as well as showing Raw Metadata.** 
 
 <br>
-<img width="1464" height="953" alt="Screenshot 2025-11-18 224946" src="https://github.com/user-attachments/assets/45f05602-ea2f-4fc5-a867-3c0551841c37" />
+<img width="1405" height="1018" alt="node Info" src="https://github.com/user-attachments/assets/afad5169-86e2-4816-9811-a3e6db25e705" />
 
 <br>
 <br>
