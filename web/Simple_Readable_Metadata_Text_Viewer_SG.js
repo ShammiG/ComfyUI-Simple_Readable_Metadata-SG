@@ -738,10 +738,10 @@ app.registerExtension({
                 if (positivePrompt) {
                     navigator.clipboard.writeText(positivePrompt);
                     copyPosBtn.textContent = "✓";
-                    setTimeout(() => { copyPosBtn.textContent = "+P"; }, 1500);
+                    setTimeout(() => { copyPosBtn.textContent = "Copy Positive"; }, 1500);
                 } else {
                     copyPosBtn.textContent = "✗";
-                    setTimeout(() => { copyPosBtn.textContent = "+P"; }, 1500);
+                    setTimeout(() => { copyPosBtn.textContent = "Copy Positive"; }, 1500);
                 }
             };
 
@@ -1431,3 +1431,4 @@ app.registerExtension({
         };
     }
 });
+
