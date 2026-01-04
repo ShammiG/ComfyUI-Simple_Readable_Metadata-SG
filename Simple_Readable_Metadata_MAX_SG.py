@@ -642,7 +642,7 @@ class SimpleReadableMetadataMAXSG:
             
             positive_prompt = positive_prompt.strip()
             
-            output.append(f"{emoji_map['prompts']} PROMPTS:")
+            output.append(f"{emoji_map['prompts']} PROMPTS: |If empty, Check fail-safe below|\n")
             output.append(f"  Positive: {positive_prompt if positive_prompt else '(empty)'}")
             output.append(f"  Negative: {negative_prompt if negative_prompt else '(empty)'}")
             output.append("")
@@ -1013,16 +1013,25 @@ class SimpleReadableMetadataMAXSG:
                         if not text_value or text_value == "N/A" or not text_value.strip():
                             continue
                         
-                        is_negative = "negative" in title or "neg" in title
-                        is_positive = ("positive" in title or "prompt" in title) and not is_negative
-                        
+                        # --- Polarity Logic (Title Priority + Content Fallback) ---
+                        is_explicit_negative = "negative" in title or "neg" in title
+                        is_explicit_positive = "positive" in title or "pos" in title
+
+                        if is_explicit_negative:
+                            is_negative = True
+                        elif is_explicit_positive:
+                            is_negative = False
+                        else:
+                            # Fallback: Check content ONLY if title is ambiguous
+                            negative_keywords = ["watermark", "bad anatomy", "ugly", "deformed", "disfigured", "blurry", "low quality", "worst quality"]
+                            is_negative = any(keyword in text_value.lower() for keyword in negative_keywords)
+
                         if is_negative:
                             negative_candidates.append(text_value)
-                        elif is_positive:
-                            positive_candidates.append(text_value)
                         else:
-                            if not positive_candidates and not negative_candidates:
-                                positive_candidates.append(text_value)
+                            # Treat as positive if not negative
+                            positive_candidates.append(text_value)
+
                 
                 except Exception as e:
                     print(f"Error processing CLIPTextEncode: {e}")
@@ -1033,7 +1042,7 @@ class SimpleReadableMetadataMAXSG:
             if negative_candidates:
                 negative_prompt = negative_candidates[0]
             
-            output.append(f"{emoji_map['prompts']} PROMPTS:")
+            output.append(f"{emoji_map['prompts']} PROMPTS: |If empty, Check fail-safe below|\n")
             if flux_prompts and (flux_prompts.get("clip_l") or flux_prompts.get("t5xxl")):
                 if flux_prompts.get("clip_l"):
                     output.append(f"  CLIP-L: {flux_prompts['clip_l']}")
@@ -1042,10 +1051,10 @@ class SimpleReadableMetadataMAXSG:
                 if guidance is not None:
                     output.append(f"  Guidance: {guidance}")
             else:
-                output.append(f"  Positive: {positive_prompt if positive_prompt else '(empty)'}")
+                output.append(f"  Positive:\n           {positive_prompt if positive_prompt else '(empty)'}\n")
                 if negative_prompt:
-                    output.append(f"  Negative: {negative_prompt}")
-            output.append("")
+                    output.append(f"  Negative:\n           {negative_prompt}")
+                output.append("")
             
             # Extract LoRA models
             loras = []
@@ -1369,18 +1378,25 @@ class SimpleReadableMetadataMAXSG:
                                 if not text_content or not text_content.strip():
                                     continue
                                 
-                                # Title matching logic
-                                is_negative = any(neg_word in title for neg_word in ["negative", "neg"])
-                                is_positive = any(pos_word in title for pos_word in ["positive", "pos", "prompt"]) and not is_negative
-                                
-                                if is_positive or ("prompt" in title and not is_negative):
-                                    if not positive:
-                                        positive = text_content
-                                elif is_negative:
-                                    negative = text_content
-                                elif not positive and not negative:
-                                    # If no title hints, assume first one is positive
-                                    positive = text_content
+                                # --- Polarity Logic (Title Priority + Content Fallback) ---
+                                is_explicit_negative = "negative" in title or "neg" in title
+                                is_explicit_positive = "positive" in title or "pos" in title
+
+                                if is_explicit_negative:
+                                    is_negative = True
+                                elif is_explicit_positive:
+                                    is_negative = False
+                                else:
+                                    # Fallback: Check content ONLY if title is ambiguous
+                                    negative_keywords = ["watermark", "bad anatomy", "ugly", "deformed", "disfigured", "blurry", "low quality", "worst quality"]
+                                    is_negative = any(keyword in text_content.lower() for keyword in negative_keywords)
+
+                                if is_negative:
+                                    negative_candidates.append(text_content)
+                                else:
+                                    # Treat as positive if not negative
+                                    positive_candidates.append(text_content)
+
                         
                         except Exception as e:
                             print(f"Error processing node in extract_individual: {e}")
