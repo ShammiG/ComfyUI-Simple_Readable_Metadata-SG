@@ -15,7 +15,7 @@
 ---
 Simple Readable Metadata-SG Nodes Info
 ---
-# Big Update: New Node to Save Prompt, show ALL text from old images and more ( 4 Jan. 2025)
+# Big Update: New Node to Save Prompt directly in metadata, show ALL embedded text in workflow from already generated images and more ( 4 Jan. 2025)
   **Check Details Below**      
    
 ---
