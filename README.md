@@ -161,13 +161,24 @@ https://github.com/user-attachments/assets/450e6d77-3634-45b2-b4f5-aa130d32f402
        
 **2.** Clone this repository into your **ComfyUI/custom_nodes** directory:    
        
-    git clone https://github.com/ShammiG/ComfyUI-Image_Properties_SG.git  
+    git clone https://github.com/ShammiG/ComfyUI-Image_Properties_SG.git            
+          
+**3.**  Install **requirements.txt**
       
-**3.** **Restart ComfyUI**             
+**4.** **Restart ComfyUI**             
   Search and add the desired node to your workflow.
 <br>
 <br>
 
+# 👑 Appreciate and support my work on --> [Patreon](https://www.patreon.com/c/ShammiG)
+<br>
+              
+# 🥛 Buy Me a LASSI ----> [BuyMeCoffee](buymeacoffee.com/shammig)      
+<br>
+<br
+
+
+     
 # Also checkout my other nodes: 
 [ComfyUI-Show-Clock-in-CMD-Console-SG](https://github.com/ShammiG/ComfyUI-Show-Clock-in-CMD-Console-SG)
 <br>
@@ -180,10 +191,6 @@ https://github.com/user-attachments/assets/450e6d77-3634-45b2-b4f5-aa130d32f402
 <br>
 
 ![Load Image And View Properties](https://github.com/user-attachments/assets/24bfdde5-98ee-46e7-aec4-230d9f3fe6ec)
-<br>
-<br>
-
-# Appreciate and support my work on [Patreon](https://www.patreon.com/c/ShammiG)
 <br>
 <br>
 
