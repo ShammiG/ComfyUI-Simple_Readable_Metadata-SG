@@ -173,7 +173,7 @@ https://github.com/user-attachments/assets/450e6d77-3634-45b2-b4f5-aa130d32f402
 # 👑 Appreciate and support my work on --> [Patreon](https://www.patreon.com/c/ShammiG)
 <br>
               
-# 🥛 Buy Me a LASSI ----> [BuyMeaCoffee](buymeacoffee.com/shammig)      
+# 🥛 Buy Me a LASSI ----> [BuyMeaCoffee](https://buymeacoffee.com/shammig)     
 <br>
 <br
 
