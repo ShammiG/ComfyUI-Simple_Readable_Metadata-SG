@@ -161,7 +161,7 @@ https://github.com/user-attachments/assets/450e6d77-3634-45b2-b4f5-aa130d32f402
        
 **2.** Clone this repository into your **ComfyUI/custom_nodes** directory:    
        
-    git clone https://github.com/ShammiG/ComfyUI-Image_Properties_SG.git            
+    git clone https://github.com/ShammiG/ComfyUI-Simple_Readable_Metadata-SG.git           
           
 **3.**  Install **requirements.txt**
       
